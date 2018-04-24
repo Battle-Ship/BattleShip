@@ -30,15 +30,15 @@
    </type>
    <relationship>
       <class="edu.buffalo.cse.green.relationship.association.AssociationPart"/>
-      <sourceType="=BattleShip/src\/main\/java<lv.odo.battleship{Player.java[Player"/>
-      <targetType="=BattleShip/src\/main\/java<lv.odo.battleship{Field.java[Field"/>
+      <sourceType="=BattleShip/src\/main\/java<lv.odo.battleship{Game.java[Game"/>
+      <targetType="=BattleShip/src\/main\/java<lv.odo.battleship{Player.java[Player"/>
       <bendpoints>
       </bendpoints>
    </relationship>
    <relationship>
       <class="edu.buffalo.cse.green.relationship.association.AssociationPart"/>
-      <sourceType="=BattleShip/src\/main\/java<lv.odo.battleship{Game.java[Game"/>
-      <targetType="=BattleShip/src\/main\/java<lv.odo.battleship{Player.java[Player"/>
+      <sourceType="=BattleShip/src\/main\/java<lv.odo.battleship{Player.java[Player"/>
+      <targetType="=BattleShip/src\/main\/java<lv.odo.battleship{Field.java[Field"/>
       <bendpoints>
       </bendpoints>
    </relationship>
