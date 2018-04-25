@@ -3,19 +3,44 @@ package lv.odo.battleship.demo;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
-import javax.swing.JPanel;
-import java.awt.BorderLayout;
+import javax.swing.SpringLayout;
+
+import lv.odo.battleship.GameControllerImpl;
+import lv.odo.battleship.Controller;
+
 import javax.swing.JTable;
+import net.miginfocom.swing.MigLayout;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+
+import javax.swing.JPanel;
+import javax.swing.JButton;
+import javax.swing.JDesktopPane;
 
 public class Main {
+	
+	//сначала определимся с габаритами нашего игрового окна
+	//пусть размер ячейчки будет 30 единиц
+	public static final int CELL_SIZE = 30;
+	
+	//количество ячеек в игровом поле 10*10, значит одно измерение равно 10
+	public static final int FIELD_DIMENSION = 10;
+	
+	//ширина окна такая, чтобы влезало два поля и было место для небольшого зазора
+	public static final int WINDOW_WIDTH = CELL_SIZE * 2 * FIELD_DIMENSION + CELL_SIZE * 2;
+	
+	//высота окна такая, чтобы влезало поле и было место для кнопок и расстояние снизу
+	public static final int WINDOW_HEIGHT = CELL_SIZE * FIELD_DIMENSION + CELL_SIZE * 5;
 
 	private JFrame frame;
-	private JTable table;
-	private JTable table_1;
+	private JTable leftTable;
+	private JTable rightTable;
+	
+	public static Controller processor = new GameControllerImpl();
 
 	/**
-	 * Launch the application.
-	 */
+	* Launch the application.
+	*/
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -30,37 +55,53 @@ public class Main {
 	}
 
 	/**
-	 * Create the application.
-	 */
+	* Create the application.
+	*/
 	public Main() {
 		initialize();
 	}
 
 	/**
-	 * Initialize the contents of the frame.
-	 */
+	* Initialize the contents of the frame.
+	*/
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 450, 300);
+		frame.setBounds(100, 100, WINDOW_WIDTH, WINDOW_HEIGHT);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.getContentPane().setLayout(new BorderLayout(0, 0));
 		
-		JPanel upPanel = new JPanel();
-		frame.getContentPane().add(upPanel, BorderLayout.NORTH);
+		JPanel top = new JPanel();
+		frame.getContentPane().add(top, BorderLayout.NORTH);
 		
-		JPanel downPanel = new JPanel();
-		frame.getContentPane().add(downPanel, BorderLayout.SOUTH);
+		Dimension buttonDimention = new Dimension(CELL_SIZE, CELL_SIZE * 2);
 		
-		JPanel leftPanel = new JPanel();
-		frame.getContentPane().add(leftPanel, BorderLayout.WEST);
+		JButton startButton = new JButton("Start");		
+		startButton.setMinimumSize(buttonDimention);
+		top.add(startButton);
 		
-		table = new JTable();
-		leftPanel.add(table);
+		JButton capitulationButton = new JButton("Capitulation");
+		capitulationButton.setMinimumSize(buttonDimention);
 		
-		JPanel rightPanel = new JPanel();
-		frame.getContentPane().add(rightPanel, BorderLayout.EAST);
+		top.add(capitulationButton);
 		
-		table_1 = new JTable();
-		rightPanel.add(table_1);
+		JPanel bottom = new JPanel();		
+		frame.getContentPane().add(bottom, BorderLayout.SOUTH);
+		
+		Dimension fieldDimention = new Dimension(CELL_SIZE * FIELD_DIMENSION, CELL_SIZE * FIELD_DIMENSION);
+		
+		JPanel left = new JPanel();		
+		left.setMinimumSize(fieldDimention);
+		frame.getContentPane().add(left, BorderLayout.WEST);
+		
+		leftTable = new BoardTable(processor.getMyField(0).getCells());
+		left.add(leftTable);
+		
+		JPanel right = new JPanel();
+		right.setMinimumSize(fieldDimention);
+		frame.getContentPane().add(right, BorderLayout.EAST);
+		
+		rightTable = new BoardTable(processor.getEnemyField(0).getCells());
+		right.add(rightTable);
 	}
-
 }
+
