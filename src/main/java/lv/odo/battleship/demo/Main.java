@@ -16,6 +16,8 @@ import java.awt.Dimension;
 import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JDesktopPane;
+import java.awt.Color;
+import javax.swing.UIManager;
 
 public class Main {
 	
@@ -66,20 +68,24 @@ public class Main {
 	*/
 	private void initialize() {
 		frame = new JFrame();
+		frame.getContentPane().setBackground(new Color(0, 0, 255));
 		frame.setBounds(100, 100, WINDOW_WIDTH, WINDOW_HEIGHT);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new BorderLayout(0, 0));
 		
 		JPanel top = new JPanel();
+		top.setBackground(new Color(0, 0, 255));
 		frame.getContentPane().add(top, BorderLayout.NORTH);
 		
 		Dimension buttonDimention = new Dimension(CELL_SIZE, CELL_SIZE * 2);
 		
 		JButton startButton = new JButton("Start");		
+		startButton.setBackground(Color.GREEN);
 		startButton.setMinimumSize(buttonDimention);
 		top.add(startButton);
 		
 		JButton capitulationButton = new JButton("Capitulation");
+		capitulationButton.setBackground(new Color(255, 140, 0));
 		capitulationButton.setMinimumSize(buttonDimention);
 		
 		top.add(capitulationButton);
@@ -90,13 +96,16 @@ public class Main {
 		Dimension fieldDimention = new Dimension(CELL_SIZE * FIELD_DIMENSION, CELL_SIZE * FIELD_DIMENSION);
 		
 		JPanel left = new JPanel();		
+		left.setBackground(UIManager.getColor("OptionPane.warningDialog.titlePane.background"));
 		left.setMinimumSize(fieldDimention);
 		frame.getContentPane().add(left, BorderLayout.WEST);
 		
 		leftTable = new BoardTable(processor.getMyField(0).getCells());
+		leftTable.setBackground(new Color(173, 216, 230));
 		left.add(leftTable);
 		
 		JPanel right = new JPanel();
+		right.setBackground(new Color(176, 224, 230));
 		right.setMinimumSize(fieldDimention);
 		frame.getContentPane().add(right, BorderLayout.EAST);
 		
