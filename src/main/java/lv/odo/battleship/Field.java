@@ -19,6 +19,10 @@ public class Field {
 		return cells;
 	}
 
+	public Cell getCell(int x, int y) {
+		return cells[x][y];
+	}
+
 	public void setCells(Cell[][] cells) {
 		this.cells = cells;
 	}

@@ -1,23 +1,20 @@
 package lv.odo.battleship.demo;
 
 import java.awt.EventQueue;
-
 import javax.swing.JFrame;
-import javax.swing.SpringLayout;
 
+import lv.odo.battleship.Cell;
+import lv.odo.battleship.Game;
 import lv.odo.battleship.GameControllerImpl;
 import lv.odo.battleship.Controller;
-
-import javax.swing.JTable;
-import net.miginfocom.swing.MigLayout;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-
 import javax.swing.JPanel;
 import javax.swing.JButton;
-import javax.swing.JDesktopPane;
-import java.awt.Color;
-import javax.swing.UIManager;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class Main {
 	
@@ -29,14 +26,16 @@ public class Main {
 	public static final int FIELD_DIMENSION = 10;
 	
 	//ширина окна такая, чтобы влезало два поля и было место для небольшого зазора
-	public static final int WINDOW_WIDTH = CELL_SIZE * 2 * FIELD_DIMENSION + CELL_SIZE * 2;
+	public static final int WINDOW_WIDTH = CELL_SIZE * 2 * FIELD_DIMENSION + CELL_SIZE * 4;
 	
 	//высота окна такая, чтобы влезало поле и было место для кнопок и расстояние снизу
 	public static final int WINDOW_HEIGHT = CELL_SIZE * FIELD_DIMENSION + CELL_SIZE * 5;
 
 	private JFrame frame;
-	private JTable leftTable;
-	private JTable rightTable;
+	private BoardTable leftTable;
+	private BoardTable rightTable;
+
+	private Game currentGame;
 	
 	public static Controller processor = new GameControllerImpl();
 
@@ -60,6 +59,7 @@ public class Main {
 	* Create the application.
 	*/
 	public Main() {
+		currentGame = processor.getGames().get(0);
 		initialize();
 	}
 
@@ -68,48 +68,66 @@ public class Main {
 	*/
 	private void initialize() {
 		frame = new JFrame();
-		frame.getContentPane().setBackground(new Color(0, 0, 255));
 		frame.setBounds(100, 100, WINDOW_WIDTH, WINDOW_HEIGHT);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(new BorderLayout(0, 0));
 		
 		JPanel top = new JPanel();
-		top.setBackground(new Color(0, 0, 255));
 		frame.getContentPane().add(top, BorderLayout.NORTH);
 		
-		Dimension buttonDimention = new Dimension(CELL_SIZE, CELL_SIZE * 2);
+		Dimension buttonDimension = new Dimension(CELL_SIZE, CELL_SIZE * 2);
 		
 		JButton startButton = new JButton("Start");		
-		startButton.setBackground(Color.GREEN);
-		startButton.setMinimumSize(buttonDimention);
+		startButton.setMinimumSize(buttonDimension);
 		top.add(startButton);
+		startButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				processor.playGame(currentGame.getId(), currentGame.getMe());
+			}
+		});
 		
 		JButton capitulationButton = new JButton("Capitulation");
-		capitulationButton.setBackground(new Color(255, 140, 0));
-		capitulationButton.setMinimumSize(buttonDimention);
+		capitulationButton.setMinimumSize(buttonDimension);
 		
 		top.add(capitulationButton);
 		
 		JPanel bottom = new JPanel();		
 		frame.getContentPane().add(bottom, BorderLayout.SOUTH);
 		
-		Dimension fieldDimention = new Dimension(CELL_SIZE * FIELD_DIMENSION, CELL_SIZE * FIELD_DIMENSION);
+		Dimension dimension = new Dimension(CELL_SIZE * FIELD_DIMENSION, CELL_SIZE * FIELD_DIMENSION);
 		
 		JPanel left = new JPanel();		
-		left.setBackground(UIManager.getColor("OptionPane.warningDialog.titlePane.background"));
-		left.setMinimumSize(fieldDimention);
+		left.setMinimumSize(dimension);
 		frame.getContentPane().add(left, BorderLayout.WEST);
 		
 		leftTable = new BoardTable(processor.getMyField(0).getCells());
-		leftTable.setBackground(new Color(173, 216, 230));
+		leftTable.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				int column = leftTable.columnAtPoint(e.getPoint());
+				int row = leftTable.rowAtPoint(e.getPoint());
+				int result = processor.placeShipInCell(33, (Cell) leftTable.getValueAt(row, column));
+				if (result == 0) {
+					//currentGame.getMe().getField().getCell(row - 1, column - 1).setStatus('s');
+				}
+				leftTable.refreshTable();
+			}
+		});
 		left.add(leftTable);
 		
 		JPanel right = new JPanel();
-		right.setBackground(new Color(176, 224, 230));
-		right.setMinimumSize(fieldDimention);
+		right.setMinimumSize(dimension);
 		frame.getContentPane().add(right, BorderLayout.EAST);
 		
 		rightTable = new BoardTable(processor.getEnemyField(0).getCells());
+		rightTable.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				int column = rightTable.columnAtPoint(e.getPoint());
+				int row = rightTable.rowAtPoint(e.getPoint());
+				Cell updated = processor.shot(33, (Cell) rightTable.getValueAt(row, column));
+				//currentGame.getEnemy().getField().getCell(row - 1, column - 1).setStatus(updated.getStatus());
+				rightTable.refreshTable();
+			}
+		});
 		right.add(rightTable);
 	}
 }
