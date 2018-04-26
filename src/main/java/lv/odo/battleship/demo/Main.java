@@ -70,6 +70,7 @@ public class Main {
 		frame = new JFrame();
 		frame.setBounds(100, 100, WINDOW_WIDTH, WINDOW_HEIGHT);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//we set layout to place game objects on game window
 		frame.getContentPane().setLayout(new BorderLayout(0, 0));
 		
 		JPanel top = new JPanel();

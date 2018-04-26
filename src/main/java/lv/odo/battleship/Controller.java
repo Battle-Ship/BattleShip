@@ -6,7 +6,9 @@ import lv.odo.battleship.Field;
 import lv.odo.battleship.Game;
 import lv.odo.battleship.Player;
 
-
+//We need this interface to provide a link between the user interface and business logic
+//This interface is a some contract, the development of both parts can go independently by two teams
+//If they follow this contract, it guarantees the compatibility of both parts
 public interface Controller {
 	
 	public List<Game> getGames();//return all games
