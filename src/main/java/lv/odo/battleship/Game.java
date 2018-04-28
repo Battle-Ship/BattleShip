@@ -1,7 +1,5 @@
 package lv.odo.battleship;
 
-import java.io.IOException;
-
 public class Game {
 	
 	private int id;
@@ -10,20 +8,12 @@ public class Game {
 	
 	private Player enemy;
 
-	public Game() {
-		super();
-	}
-
 	public Game(int id, Player me, Player enemy) {
 		super();
 		this.id = id;
 		this.me = me;
 		this.enemy = enemy;
 	}
-
-	public void start() throws IOException {
-
-	}	
 	
 	public int getId() {
 		return id;
@@ -54,8 +44,5 @@ public class Game {
 		return "Game [id=" + id + ", me=" + me + ", enemy=" + enemy + "]";
 	}
 
-	public static void main(String[] args) throws IOException{
-
-	}
 }
 

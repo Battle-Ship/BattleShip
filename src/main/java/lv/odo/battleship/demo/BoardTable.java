@@ -25,14 +25,9 @@ public class BoardTable extends JTable {
 			column.setPreferredWidth(Main.CELL_SIZE);
 		}
 		//this method to set our Cell objects into each cell of table model
-		refreshTable();
+		refreshTable(cells);
 		//here we set rows height to make cells dimensions equals
 		setRowHeight(Main.CELL_SIZE);
-	}
-
-
-	public void refreshTable() {
-		refreshTable(this.cells);
 	}
 
 	//set our Cell objects into each cell of table model in cycle

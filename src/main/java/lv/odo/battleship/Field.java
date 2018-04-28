@@ -11,10 +11,6 @@ public class Field {
 		this.cells = cells;
 	}
 
-	public Field() {
-		cells = new Cell[10][10];
-	}
-
 	public Cell[][] getCells() {
 		return cells;
 	}
@@ -30,7 +26,21 @@ public class Field {
 	@Override
 	public String toString() {
 		return "Field [cells=" + Arrays.toString(cells) + "]";
-	}	
+	}
+
+	@Override
+	protected Field clone() {
+		Cell[][] cloned = new Cell[this.cells.length][this.cells[0].length];
+		for(int i = 0; i < cloned.length; i++) {
+			for(int j = 0; j < cloned[i].length; j++) {
+				cloned[i][j] = this.cells[i][j].clone();
+			}
+		}
+		Field clone = new Field(cloned);
+		return clone;
+	}
+	
+	
 
 }
 

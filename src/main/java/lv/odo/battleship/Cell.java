@@ -44,4 +44,11 @@ public class Cell {
 		return "Cell [status=" + status + ", x=" + x + ", y=" + y + "]";
 	}
 
+	@Override
+	protected Cell clone() {
+		return new Cell(this.status, this.x, this.y);
+	}
+	
+	
+
 }

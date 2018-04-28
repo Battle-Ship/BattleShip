@@ -49,6 +49,7 @@ public class BoardTableCellRenderer implements TableCellRenderer {
 					ImageIcon buttonIcon = new ImageIcon ("images/miss.png");
 					JButton button = new JButton();
 					button.setIcon(buttonIcon);
+					button.setBackground(Color.BLUE);
 					return button;
 				}
 				case 'x': {

@@ -1,7 +1,7 @@
 package lv.odo.battleship;
 
 import java.util.List;
-import lv.odo.battleship.Cell;
+
 import lv.odo.battleship.Field;
 import lv.odo.battleship.Game;
 import lv.odo.battleship.Player;
@@ -25,6 +25,7 @@ public interface Controller {
 	public int placeShipInCell(int gameId, Cell cell);
 			//returns -1 if no luck
 			//returns 0 if ship is placed
+			//returns 1 if all ships have been placed
 	
 	public Field getEnemyField(int gameId);
 			//returns enemy field
