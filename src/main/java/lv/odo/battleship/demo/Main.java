@@ -49,6 +49,7 @@ public class Main {
 	private BoardTable leftTable;
 	private BoardTable rightTable;
 	private JPanel leftShipsPanel;
+	private JPanel rightShipsPanel;
 
 	private Game currentGame;
 	
@@ -123,7 +124,7 @@ public class Main {
 		FlowLayout flowLayout = (FlowLayout) leftShipsPanel.getLayout();
 		flowLayout.setAlignment(FlowLayout.LEFT);
 		leftField.add(leftShipsPanel, BorderLayout.SOUTH);		
-		addShipOnPlayerPanel();
+		refreshShipsPanel(leftShipsPanel, processor.getMyField(currentGame.getId()).getCells());
 		//we need to handle clicks on table with player field
 		leftTable.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
@@ -135,7 +136,9 @@ public class Main {
 				Cell target = (Cell) leftTable.getValueAt(row, column);
 				//We pass game id and cell to place our ship and get the result
 				int result = processor.placeShipInCell(currentGame.getId(), target);
-				leftTable.refreshTable(processor.getMyField(currentGame.getId()).getCells());
+				Cell[][] cells = processor.getMyField(currentGame.getId()).getCells();
+				leftTable.refreshTable(cells);
+				refreshShipsPanel(leftShipsPanel, cells);
 			}
 		});		
 		JPanel right = new JPanel();
@@ -152,11 +155,13 @@ public class Main {
 		rightField.add(player1, BorderLayout.NORTH);
 		player1.setFont(new Font("Tahoma", Font.PLAIN, 22));
 		player1.setHorizontalAlignment(SwingConstants.CENTER);		
-		JPanel rightShipsPanel = new JPanel();
-		FlowLayout flowLayout_1 = (FlowLayout) rightShipsPanel.getLayout();
+		rightShipsPanel = new JPanel();
+		((FlowLayout) rightShipsPanel.getLayout()).setAlignment(FlowLayout.LEFT);
 		rightField.add(rightShipsPanel, BorderLayout.SOUTH);		
 		Component rigidArea = Box.createRigidArea(new Dimension(20, 20));
 		frame.getContentPane().add(rigidArea, BorderLayout.CENTER);
+		//for correct display of enemy statistics, we need to get actual information about enemy cells
+		refreshShipsPanel(rightShipsPanel, currentGame.getEnemy().getField().getCells());
 		//we need to handle clicks on table with enemy field
 		rightTable.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
@@ -170,17 +175,39 @@ public class Main {
 				Cell updated = processor.shot(currentGame.getId(), target);
 				//refresh table model to see result
 				rightTable.refreshTable(processor.getEnemyField(currentGame.getId()).getCells());
+				refreshShipsPanel(rightShipsPanel, currentGame.getEnemy().getField().getCells());
 			}
 		});
 	}
 
-	private void addShipOnPlayerPanel() {
-		JButton ship = new JButton("");
-		ship.setBackground(Color.YELLOW);
-		ship.setHorizontalAlignment(SwingConstants.LEFT);
-		ship.setForeground(new Color(255, 255, 0));
-		ship.setPreferredSize(new Dimension(15, 15));
-		leftShipsPanel.add(ship);
+	private void refreshShipsPanel(JPanel shipPanel, Cell[][] cells) {
+		shipPanel.removeAll();
+		int playerLiveShips = 0;
+		int playerKilledShips = 0;
+		for(int i = 0; i < cells.length; i++) {
+			for(int j = 0; j < cells[i].length; j++) {
+				if(cells[i][j].getStatus() == 's') {
+					playerLiveShips++;
+				}
+				if(cells[i][j].getStatus() == 'x') {
+					playerKilledShips++;
+				}
+			}
+		}
+		for(int i = 0; i < playerKilledShips + playerLiveShips; i++) {
+			JButton ship = new JButton("");
+			if(i < playerLiveShips) {
+				ship.setBackground(Color.YELLOW);
+			} else {
+				ship.setBackground(Color.RED);
+			}
+			ship.setHorizontalAlignment(SwingConstants.LEFT);
+			ship.setForeground(new Color(255, 255, 0));
+			ship.setPreferredSize(new Dimension(15, 15));
+			shipPanel.add(ship);
+		}
+		frame.getContentPane().invalidate();
+		frame.getContentPane().validate();
 	}
 	
 	private void buildStartMenuWindow() {
