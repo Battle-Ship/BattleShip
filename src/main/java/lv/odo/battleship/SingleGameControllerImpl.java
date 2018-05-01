@@ -1,9 +1,11 @@
 package lv.odo.battleship;
 
+import lv.odo.battleship.ai.ComputerAI;
+import lv.odo.battleship.ai.GameOverException;
+import lv.odo.battleship.ai.StupidAI;
 import lv.odo.battleship.demo.Main;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -21,7 +23,7 @@ public class SingleGameControllerImpl implements Controller {
 
     private Field myField;
 
-    private int maxShipElementsNumber;
+    private ComputerAI ai = new StupidAI();
 
     //0 if my turn
     //1 if enemy turn
@@ -31,6 +33,10 @@ public class SingleGameControllerImpl implements Controller {
         super();
     }
 
+    public Game getGame(int gameId) {
+        return this.game;
+    }
+
     public List<Game> getGames() {
         List<Game> games = new ArrayList<Game>();
         games.add(this.game);
@@ -38,7 +44,6 @@ public class SingleGameControllerImpl implements Controller {
     }
 
     public Game createGame(Player me) {
-        this.maxShipElementsNumber = Main.SHIPS;
         this.enemyField = generateEnemyField();
         this.myField = initMyField();
         me.setField(this.myField);
@@ -58,34 +63,74 @@ public class SingleGameControllerImpl implements Controller {
     //0 if my turn
     //1 if enemy turn
     public int playGame(int gameId, Player me) {
+        while (turn == 1) {
+            try {
+                Cell nextTarget = ai.selectNextTarget(myField.getCells());
+                if (nextTarget.isShip()) {
+                    nextTarget.setStatus('x');
+
+                    Set<Cell> shipPositions = new HashSet<Cell>();
+                    Helper.findWholeShip(nextTarget.clone(), shipPositions, myField.clone().getCells());
+                    boolean allDead = true;
+                    for (Cell position : shipPositions) {
+                        if (myField.getCells()[position.getX()][position.getY()].getStatus() == 's') {
+                            allDead = false;
+                        }
+                    }
+                    if (allDead) {
+                        processDeadShip(shipPositions, myField.getCells());
+                    }
+
+                } else {
+                    nextTarget.setStatus('*');
+                    turn = 0;
+                }
+            } catch (GameOverException e) {
+                return -1;
+            }
+        }
         return turn;
     }
 
     public int placeShipInCell(int gameId, Cell cell) {
         if (myField.getCell(cell.getX(), cell.getY()).getStatus() == 's') {
-            if (canSetNewStatus(cell, '~')) {
+            if (canOccupyCellWithStatus(cell, '~')) {
                 myField.getCell(cell.getX(), cell.getY()).setStatus('~');
-                return 1;
+                return 0;
             } else {
                 return -1;
             }
         }
-        if (maxShipElementsNumber > 0) {
-            if (canSetNewStatus(cell, 's')) {
-                myField.getCell(cell.getX(), cell.getY()).setStatus('s');
-                System.out.println("placed Ship in Cell " + cell);
-                maxShipElementsNumber--;
-                return 0;
-            } else {
+        if (canOccupyCellWithStatus(cell, 's')) {
+            myField.getCell(cell.getX(), cell.getY()).setStatus('s');
+            if (checkFieldIsFull()) {
+                turn = game.getTurn();
                 return 1;
+            } else {
+                return 0;
             }
         } else {
-            System.out.println("can't place Ship in Cell " + cell + ", you don't have ships anymore");
-            return 1;
+            //can't place Ship in Cell
+            return -1;
         }
     }
 
-    private boolean canSetNewStatus(Cell cell, char status) {
+    private boolean checkFieldIsFull() {
+        Field testField = myField.clone();
+        List<List<Cell>> myFleet = Helper.processFleet(testField);
+        int[] fleet = Main.POSSIBLE_FLEET.clone();
+        for (int i = 0; i < myFleet.size(); i++) {
+            fleet[myFleet.get(i).size() - 1]--;
+        }
+        for (int i = 0; i < fleet.length; i++) {
+            if (fleet[i] > 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean canOccupyCellWithStatus(Cell cell, char status) {
         Field testField = myField.clone();
         testField.getCell(cell.getX(), cell.getY()).setStatus(status);
         List<List<Cell>> myFleet = Helper.processFleet(testField);
@@ -97,7 +142,7 @@ public class SingleGameControllerImpl implements Controller {
                     currentNumber++;
                 }
                 if (currentNumber >= maxNumber + 1) {
-                    System.out.println("can't place Ship in Cell " + cell + ", reached " + maxNumber + " max number of cells in ship");
+                    //can't place Ship in Cell, max number of cells in ship
                     return false;
                 }
             }
@@ -109,7 +154,6 @@ public class SingleGameControllerImpl implements Controller {
     //for that we need to return only cloned and
     //changed array of cells with hide ships
     public Field getEnemyField(int gameId) {
-        System.out.println("getEnemyField");
         Field result = enemyField.clone();
         Cell[][] enemyCells = result.getCells();
         for (int i = 0; i < enemyCells.length; i++) {
@@ -132,6 +176,7 @@ public class SingleGameControllerImpl implements Controller {
             processHitting(cell);
         } else {
             enemyField.getCell(cell.getX(), cell.getY()).setStatus('*');
+            turn = 1;
         }
         return cell;
     }
@@ -205,8 +250,8 @@ public class SingleGameControllerImpl implements Controller {
     }
 
     private Field initMyField() {
-        //return new Field(Helper.getEmptyField());
-        return new Field(Helper.generateRandomField());
+        return new Field(Helper.getEmptyField());
+        //return new Field(Helper.generateRandomField());
     }
 
     private Field generateEnemyField() {

@@ -10,6 +10,8 @@ import lv.odo.battleship.Player;
 //This interface is a some contract, the development of both parts can go independently by two teams
 //If they follow this contract, it guarantees the compatibility of both parts
 public interface Controller {
+
+	public Game getGame(int gameId);//retrieve game by id
 	
 	public List<Game> getGames();//return all games
 	
@@ -26,6 +28,7 @@ public interface Controller {
 			//returns -1 if no luck
 			//returns 0 if ship is placed
 			//returns 1 if all ships have been placed
+			//returns 2 if enemy is not ready
 	
 	public Field getEnemyField(int gameId);
 			//returns enemy field

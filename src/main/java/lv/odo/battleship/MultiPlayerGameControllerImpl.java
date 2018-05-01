@@ -4,6 +4,10 @@ import java.util.List;
 
 public class MultiPlayerGameControllerImpl implements Controller {
 
+    public Game getGame(int gameId) {
+        return null;
+    }
+
     public List<Game> getGames() {
         return null;
     }

@@ -15,10 +15,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Main {
+
+    public final static int PLAYER_NAME_BLINK_INTERVAL = 1000;
 
     public static final String PLAYER_NAME = "Player";
 
@@ -31,7 +32,7 @@ public class Main {
     public static final int WINDOW_WIDTH = CELL_SIZE * 2 * FIELD_DIMENSION + CELL_SIZE * 4;
 
     //calculate game window height
-    public static final int WINDOW_HEIGHT = CELL_SIZE * FIELD_DIMENSION + CELL_SIZE * 8;
+    public static final int WINDOW_HEIGHT = CELL_SIZE * FIELD_DIMENSION + CELL_SIZE * 9;
 
     //maximal number of ships
     public static final int SHIPS = 20;
@@ -48,8 +49,18 @@ public class Main {
     private BoardTable rightTable;
     private JPanel leftShipsPanel;
     private JPanel rightShipsPanel;
+    private JLabel myLaunchLabel;
+    private JLabel enemyLaunchLabel;
 
     private Game currentGame;
+
+    private Status status = Status.GAME_SELECT;
+
+    public enum Status {
+        GAME_SELECT, PLACE_SHIP, ALL_SHIPS_PLACED, MY_TURN, ENEMY_TURN, ENEMY_PLACES_SHIPS, END_GAME
+    }
+
+    private JLabel gameStatusLabel;
 
     public static Controller processor = new SingleGameControllerImpl();
 
@@ -85,24 +96,48 @@ public class Main {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         //we set layout to place game objects on game window
         frame.getContentPane().setLayout(new BorderLayout(0, 0));
-        buildBattlefield();
+
+        JMenuBar menuBar = new JMenuBar();
+        frame.setJMenuBar(menuBar);
+
+        JMenu mnHelp = new JMenu("Help");
+        menuBar.add(mnHelp);
+
+        JTextPane txtpnHelpTextAbout = new JTextPane();
+        txtpnHelpTextAbout.setText("Help Text About game");
+        mnHelp.add(txtpnHelpTextAbout);
+
+        JPanel panel = new JPanel();
+        menuBar.add(panel);
+
+        this.gameStatusLabel = new JLabel("");
+        gameStatusLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        panel.add(gameStatusLabel);
+        buildStartMenuWindow();
     }
 
     private void buildBattlefield() {
         this.currentGame = processor.createGame(new Player(PLAYER_NAME));
         JPanel bottom = new JPanel();
         frame.getContentPane().add(bottom, BorderLayout.SOUTH);
+
+        this.myLaunchLabel = new JLabel();
+        bottom.add(myLaunchLabel);
+        myLaunchLabel.setVisible(false);
         Button buttonEnd = new Button("End game");
         bottom.add(buttonEnd);
         buttonEnd.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                System.out.println("open battlefield");
+                status = Status.GAME_SELECT;
                 frame.getContentPane().removeAll();
                 buildStartMenuWindow();
                 frame.getContentPane().invalidate();
                 frame.getContentPane().validate();
             }
         });
+        this.enemyLaunchLabel = new JLabel();
+        bottom.add(enemyLaunchLabel);
+        this.enemyLaunchLabel.setVisible(false);
         Dimension dimension = new Dimension(CELL_SIZE * FIELD_DIMENSION, CELL_SIZE * FIELD_DIMENSION);
         JPanel left = new JPanel();
         FlowLayout leftLayout = (FlowLayout) left.getLayout();
@@ -114,7 +149,7 @@ public class Main {
         leftField.setLayout(new BorderLayout(0, 0));
         leftTable = new BoardTable(processor.getMyField(0).getCells());
         leftField.add(leftTable, BorderLayout.CENTER);
-        JLabel playerName = new JLabel(currentGame.getMe().getName());
+        final JLabel playerName = new JLabel(currentGame.getMe().getName());
         leftField.add(playerName, BorderLayout.NORTH);
         playerName.setFont(new Font("Tahoma", Font.PLAIN, 22));
         playerName.setHorizontalAlignment(SwingConstants.CENTER);
@@ -125,17 +160,30 @@ public class Main {
         //we need to handle clicks on table with player field
         leftTable.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                //we get column number
-                int column = leftTable.columnAtPoint(e.getPoint());
-                //and row number
-                int row = leftTable.rowAtPoint(e.getPoint());
-                //we get cell from table by column and row number
-                Cell target = (Cell) leftTable.getValueAt(row, column);
-                //We pass game id and cell to place our ship and get the result
-                int result = processor.placeShipInCell(currentGame.getId(), target);
-                Field field = processor.getMyField(currentGame.getId());
-                leftTable.refreshTable(field.getCells());
-                refreshMyPanel(leftShipsPanel, field);
+                if (status == Status.PLACE_SHIP || status == Status.ALL_SHIPS_PLACED) {
+                    //we get column number
+                    int column = leftTable.columnAtPoint(e.getPoint());
+                    //and row number
+                    int row = leftTable.rowAtPoint(e.getPoint());
+                    //we get cell from table by column and row number
+                    Cell target = (Cell) leftTable.getValueAt(row, column);
+                    //We pass game id and cell to place our ship and get the result
+                    int result = processor.placeShipInCell(currentGame.getId(), target);
+                    if (result == 0) {
+                        if (!target.isShip()) {
+                            status = Status.PLACE_SHIP;
+                            gameStatusLabel.setText("Ship is deleted");
+                        } else {
+                            gameStatusLabel.setText("Ship is placed");
+                        }
+                    } else if (result == 1) {
+                        status = Status.ALL_SHIPS_PLACED;
+                        gameStatusLabel.setText("All ships are placed");
+                    }
+                    updateMyField();
+                } else {
+                    gameStatusLabel.setText("You can't place ship in current game mode");
+                }
             }
         });
         JPanel right = new JPanel();
@@ -148,17 +196,18 @@ public class Main {
         rightField.setLayout(new BorderLayout(0, 0));
         rightTable = new BoardTable(processor.getEnemyField(0).getCells());
         rightField.add(rightTable, BorderLayout.CENTER);
-        JLabel enemyName = new JLabel(currentGame.getEnemy().getName());
+        final JLabel enemyName = new JLabel(currentGame.getEnemy().getName());
         rightField.add(enemyName, BorderLayout.NORTH);
         enemyName.setFont(new Font("Tahoma", Font.PLAIN, 22));
         enemyName.setHorizontalAlignment(SwingConstants.CENTER);
+
+        refreshGameStatus();
+
         rightShipsPanel = new JPanel();
 
         rightShipsPanel.setLayout(new BoxLayout(rightShipsPanel, BoxLayout.Y_AXIS));
         rightField.add(rightShipsPanel, BorderLayout.SOUTH);
 
-        //((FlowLayout) rightShipsPanel.getLayout()).setAlignment(FlowLayout.LEFT);
-        //rightField.add(rightShipsPanel, BorderLayout.SOUTH);
         Component rigidArea = Box.createRigidArea(new Dimension(20, 20));
         frame.getContentPane().add(rigidArea, BorderLayout.CENTER);
         //for correct display of enemy statistics, we need to get actual information about enemy cells
@@ -166,59 +215,31 @@ public class Main {
         //we need to handle clicks on table with enemy field
         rightTable.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                //we get column number
-                int column = rightTable.columnAtPoint(e.getPoint());
-                //and row number
-                int row = rightTable.rowAtPoint(e.getPoint());
-                //we get cell from table by column and row number
-                Cell target = (Cell) rightTable.getValueAt(row, column);
-                //We pass game id and cell to make a shot and get the cell after shot
-                Cell updated = processor.shot(currentGame.getId(), target);
-                //refresh table model to see result
-                rightTable.refreshTable(processor.getEnemyField(currentGame.getId()).getCells());
-                refreshEnemyPanel(rightShipsPanel, currentGame.getEnemy().getField());
-            }
-        });
-    }
-
-    //this method build component with ship indicators in the bottom of player field
-    private void showMyFleet(JPanel shipPanel, List<List<Cell>> fleet) {
-        shipPanel.removeAll();
-        List<JPanel> panels = new ArrayList<JPanel>(SHIP_SIZE);
-        for(int j = 0; j < SHIP_SIZE; j++) {
-            JPanel panel = new JPanel();
-            ((FlowLayout) panel.getLayout()).setAlignment(FlowLayout.LEFT);
-            panels.add(panel);
-            shipPanel.add(panel);
-        }
-        int[] shipsLeft = POSSIBLE_FLEET.clone();
-        for(int i = 0; i < fleet.size(); i++) {
-            shipsLeft[fleet.get(i).size() - 1]--;
-        }
-        for(int i = 0; i < fleet.size(); i++) {
-            JPanel group = panels.get(fleet.get(i).size() - 1);
-            for(int j = 0; j < fleet.get(i).size(); j++) {
-                if(fleet.get(i).get(j).getStatus() == 's') {
-                    group.add(getShipIndicator(Color.YELLOW, false));
+                if (status == Status.MY_TURN) {
+                    //we get column number
+                    int column = rightTable.columnAtPoint(e.getPoint());
+                    //and row number
+                    int row = rightTable.rowAtPoint(e.getPoint());
+                    //we get cell from table by column and row number
+                    Cell target = (Cell) rightTable.getValueAt(row, column);
+                    //We pass game id and cell to make a shot and get the cell after shot
+                    Cell updated = processor.shot(currentGame.getId(), target);
+                    if (updated.getStatus() == '*') {
+                        gameStatusLabel.setText("Missed");
+                    } else if (updated.getStatus() == 'x') {
+                        gameStatusLabel.setText("Hit!");
+                    } else if (updated.getStatus() == '.') {
+                        gameStatusLabel.setText("Killed!");
+                    }
+                    //refresh table model to see result
+                    rightTable.refreshTable(processor.getEnemyField(currentGame.getId()).getCells());
+                    refreshEnemyPanel(rightShipsPanel, currentGame.getEnemy().getField());
                 } else {
-                    group.add(getShipIndicator(Color.RED, false));
+                    gameStatusLabel.setText("You can't attack now");
                 }
             }
-            group.add(Box.createRigidArea(new Dimension(5, 0)));
-        }
-        for(int i = 0; i < shipsLeft.length; i++) {
-            int add = shipsLeft[i];
-            System.out.println(Arrays.toString(shipsLeft));
-            System.out.println(i + ":" + add);
-            for(int j = 0; j < add * (i + 1); j++) {
-                panels.get(i).add(getShipIndicator(Color.WHITE, true));
-                if((j + 1) % (i + 1) == 0) {
-                    panels.get(i).add(Box.createRigidArea(new Dimension(5, 0)));
-                }
-            }
-        }
-        frame.getContentPane().invalidate();
-        frame.getContentPane().validate();
+
+        });
     }
 
     private JButton getShipIndicator(Color color, boolean transparent) {
@@ -227,7 +248,7 @@ public class Main {
         ship.setForeground(new Color(255, 255, 0));
         ship.setPreferredSize(new Dimension(15, 15));
         ship.setBackground(color);
-        if(transparent) {
+        if (transparent) {
             ship.setOpaque(false);
             ship.setContentAreaFilled(false);
             ship.setBorderPainted(true);
@@ -235,9 +256,43 @@ public class Main {
         return ship;
     }
 
+    //this method builds component with ship indicators in the bottom of player field
     private void refreshMyPanel(JPanel myPanel, Field field) {
         List<List<Cell>> fleet = Helper.processFleet(field);
-        showMyFleet(myPanel, fleet);
+        myPanel.removeAll();
+        List<JPanel> panels = new ArrayList<JPanel>(SHIP_SIZE);
+        for (int j = 0; j < SHIP_SIZE; j++) {
+            JPanel panel = new JPanel();
+            ((FlowLayout) panel.getLayout()).setAlignment(FlowLayout.LEFT);
+            panels.add(panel);
+            myPanel.add(panel);
+        }
+        int[] shipsLeft = POSSIBLE_FLEET.clone();
+        for (int i = 0; i < fleet.size(); i++) {
+            shipsLeft[fleet.get(i).size() - 1]--;
+        }
+        for (int i = 0; i < fleet.size(); i++) {
+            JPanel group = panels.get(fleet.get(i).size() - 1);
+            for (int j = 0; j < fleet.get(i).size(); j++) {
+                if (fleet.get(i).get(j).getStatus() == 's') {
+                    group.add(getShipIndicator(Color.YELLOW, false));
+                } else {
+                    group.add(getShipIndicator(Color.RED, false));
+                }
+            }
+            group.add(Box.createRigidArea(new Dimension(5, 0)));
+        }
+        for (int i = 0; i < shipsLeft.length; i++) {
+            int add = shipsLeft[i];
+            for (int j = 0; j < add * (i + 1); j++) {
+                panels.get(i).add(getShipIndicator(Color.WHITE, true));
+                if ((j + 1) % (i + 1) == 0) {
+                    panels.get(i).add(Box.createRigidArea(new Dimension(5, 0)));
+                }
+            }
+        }
+        frame.getContentPane().invalidate();
+        frame.getContentPane().validate();
     }
 
     private void refreshEnemyPanel(JPanel shipPanel, Field field) {
@@ -252,18 +307,18 @@ public class Main {
         }
         int playerLiveShips = 0;
         int playerKilledShips = 0;
-        for(int i = 0; i < cells.length; i++) {
-            for(int j = 0; j < cells[i].length; j++) {
-                if(cells[i][j].getStatus() == 's') {
+        for (int i = 0; i < cells.length; i++) {
+            for (int j = 0; j < cells[i].length; j++) {
+                if (cells[i][j].getStatus() == 's') {
                     playerLiveShips++;
                 }
-                if(cells[i][j].getStatus() == 'x' || cells[i][j].getStatus() == '.') {
+                if (cells[i][j].getStatus() == 'x' || cells[i][j].getStatus() == '.') {
                     playerKilledShips++;
                 }
             }
         }
-        for(int i = 0; i < playerKilledShips + playerLiveShips; i++) {
-            if(i < playerLiveShips) {
+        for (int i = 0; i < playerKilledShips + playerLiveShips; i++) {
+            if (i < playerLiveShips) {
                 panels.get(i % SHIP_SIZE).add(getShipIndicator(Color.YELLOW, false));
             } else {
                 panels.get(i % SHIP_SIZE).add(getShipIndicator(Color.RED, false));
@@ -296,7 +351,7 @@ public class Main {
         btnSingleplayer.setBorder(null);
         btnSingleplayer.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                System.out.println("open battlefield");
+                status = Status.PLACE_SHIP;
                 frame.getContentPane().removeAll();
                 buildBattlefield();
                 frame.getContentPane().invalidate();
@@ -367,5 +422,71 @@ public class Main {
         lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
         panelTop.add(lblNewLabel);
     }
+
+    private void refreshGameStatus() {
+        Timer timer = new Timer(PLAYER_NAME_BLINK_INTERVAL, new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                int turn = processor.playGame(0, currentGame.getMe());
+                if (turn == 2) {
+                    setEnemyPlaceIcon();
+                }
+                if(status != Status.PLACE_SHIP) {
+                    if (turn == 0) {
+                        updateMyField();
+                        updateEnemyField();
+                        setMyTurnIcon();
+                        status = Status.MY_TURN;
+                    } else if (turn == 1) {
+                        updateMyField();
+                        updateEnemyField();
+                        setEnemyTurnIcon();
+                        status = Status.ENEMY_TURN;
+                    }
+                } else {
+                    setMePlaceIcon();
+                }
+            }
+        });
+        timer.start();
+    }
+
+    private void setMyTurnIcon() {
+        ImageIcon myLaunchIcon = new ImageIcon("images/leftLaunch.png");
+        myLaunchLabel.setIcon(myLaunchIcon);
+        this.myLaunchLabel.setVisible(true);
+        this.enemyLaunchLabel.setVisible(false);
+    }
+
+    private void setEnemyTurnIcon() {
+        ImageIcon enemyLaunchIcon = new ImageIcon("images/rightLaunch.png");
+        enemyLaunchLabel.setIcon(enemyLaunchIcon);
+        this.enemyLaunchLabel.setVisible(true);
+        this.myLaunchLabel.setVisible(false);
+    }
+
+    private void setMePlaceIcon() {
+        ImageIcon location = new ImageIcon("images/location.png");
+        myLaunchLabel.setIcon(location);
+        this.myLaunchLabel.setVisible(true);
+    }
+
+    private void setEnemyPlaceIcon() {
+        ImageIcon location = new ImageIcon("images/location.png");
+        enemyLaunchLabel.setIcon(location);
+        this.enemyLaunchLabel.setVisible(true);
+    }
+
+    private void updateEnemyField() {
+        Field field = processor.getEnemyField(currentGame.getId());
+        rightTable.refreshTable(field.getCells());
+        refreshEnemyPanel(rightShipsPanel, field);
+    }
+
+    private void updateMyField() {
+        Field field = processor.getMyField(currentGame.getId());
+        leftTable.refreshTable(field.getCells());
+        refreshMyPanel(leftShipsPanel, field);
+    }
+
 }
 

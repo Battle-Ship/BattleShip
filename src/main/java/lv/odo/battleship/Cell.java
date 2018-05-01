@@ -45,7 +45,7 @@ public class Cell {
 	}
 
 	@Override
-	protected Cell clone() {
+	public Cell clone() {
 		return new Cell(this.status, this.x, this.y);
 	}
 	
