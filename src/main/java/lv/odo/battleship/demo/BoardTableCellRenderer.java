@@ -3,17 +3,14 @@ package lv.odo.battleship.demo;
 import java.awt.Color;
 import java.awt.Component;
 
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JTable;
+import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 
 import lv.odo.battleship.Cell;
 
 //Standard JTable contains interface TableCellRenderer class to render table cells by default
 //We have to implement it to render our cells as we need
-public class BoardTableCellRenderer implements TableCellRenderer {	
+public class BoardTableCellRenderer implements TableCellRenderer {
 
 	//here are the name of columns
 	static String[] columns = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J"};
@@ -25,17 +22,22 @@ public class BoardTableCellRenderer implements TableCellRenderer {
 	//Here we decide how to display them
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 												   int row, int column) {
+		table.getColumnModel().getColumn(0);
 		//the first element of table is empty
 		if (row == 0 && column == 0) {
 			return new JLabel();
 		}
 		//all elements in first row, excluding first column, must be a letters from array of letters
 		if (row == 0 && column > 0) {
-			return new JLabel(columns[column - 1]);
+			JLabel label = new JLabel(columns[column - 1]);
+			label.setHorizontalAlignment(SwingConstants.CENTER);
+			return label;
 		}
 		//all elements in first column, excluding first row, must be a numbers equals to row number
 		if (column == 0 && row > 0) {
-			return new JLabel(Integer.toString(row));
+			JLabel label = new JLabel(Integer.toString(row));
+			label.setHorizontalAlignment(SwingConstants.CENTER);
+			return label;
 		}
 		//other cells of table must contain Cell objects, we set them before
 		//and we handle them in that method:

@@ -23,21 +23,25 @@ public class Field {
 		this.cells = cells;
 	}
 
-	@Override
 	public String toString() {
-		return "Field [cells=" + Arrays.toString(cells) + "]";
+		final StringBuilder sb = new StringBuilder("[");
+		for(int i = 0; i < cells.length; i++) {
+			sb.append(Arrays.toString(cells[i]));
+			sb.append("\n");
+		}
+		sb.append(']');
+		return sb.toString();
 	}
 
 	@Override
-	protected Field clone() {
+	public Field clone() {
 		Cell[][] cloned = new Cell[this.cells.length][this.cells[0].length];
 		for(int i = 0; i < cloned.length; i++) {
 			for(int j = 0; j < cloned[i].length; j++) {
-				cloned[i][j] = this.cells[i][j].clone();
+				cloned[i][j] = new Cell(this.cells[i][j].getStatus(), this.cells[i][j].getX(), this.cells[i][j].getY());
 			}
 		}
-		Field clone = new Field(cloned);
-		return clone;
+		return new Field(cloned);
 	}
 	
 	

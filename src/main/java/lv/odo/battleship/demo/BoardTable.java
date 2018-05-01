@@ -19,7 +19,9 @@ public class BoardTable extends JTable {
 		//in cycle we set the size of columns and add our customized BoardTableCellRenderer into each column
 		for(int i = 0; i < cells.length + 1; i++) {	
 			TableColumn column = getColumnModel().getColumn(i);
-			column.setCellRenderer(new BoardTableCellRenderer());
+			BoardTableCellRenderer renderer = new BoardTableCellRenderer();
+			column.setCellRenderer(renderer);
+			//centerRenderer
 			column.setMinWidth(Main.CELL_SIZE);
 			column.setMaxWidth(Main.CELL_SIZE);
 			column.setPreferredWidth(Main.CELL_SIZE);

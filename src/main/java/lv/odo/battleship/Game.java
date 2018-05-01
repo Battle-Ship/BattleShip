@@ -3,6 +3,14 @@ package lv.odo.battleship;
 public class Game {
 	
 	private int id;
+
+	//true if battle is in process
+	//false if players place ships
+	private boolean active = false;
+
+	//0 if my turn
+	//1 if enemy turn
+	private int turn;
 	
 	private Player me;
 	
@@ -39,9 +47,25 @@ public class Game {
 		this.enemy = enemy;
 	}
 
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
+	public int getTurn() {
+		return turn;
+	}
+
+	public void setTurn(int turn) {
+		this.turn = turn;
+	}
+
 	@Override
 	public String toString() {
-		return "Game [id=" + id + ", me=" + me + ", enemy=" + enemy + "]";
+		return "Game [id=" + id + ", me=" + me + ", enemy=" + enemy + ", active=" + active + ", turn=" + turn + "]";
 	}
 
 }

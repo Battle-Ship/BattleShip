@@ -1,130 +1,216 @@
 package lv.odo.battleship;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import lv.odo.battleship.demo.Main;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 public class SingleGameControllerImpl implements Controller {
 
-	private Game game;
+    private Game game;
 
-	private Player enemy;
+    private Player enemy;
 
-	private Player player;
+    private Player player;
 
-	private Field enemyField;
+    private Field enemyField;
 
-	private Field myField;
-	
-	private int playerShips; 
+    private Field myField;
 
-	public SingleGameControllerImpl() {
-		super();
-		this.playerShips = Main.SHIPS;
-		myField = getMyExampleField();
-		enemyField = getEnemyExampleField();
-		player = new Player("Me", myField);
-		enemy = new Player("Computer", enemyField);
-		game = new Game(0, player, enemy);
-	}
+    private int maxShipElementsNumber;
 
-	public List<Game> getGames() {
-		List<Game> games = new ArrayList<Game>();
-		games.add(game);
-		System.out.println("get games " + games);
-		return games;
-	}
+    //0 if my turn
+    //1 if enemy turn
+    private int turn;
 
-	public Game createGame(Player me) {
-		return game;
-	}
+    public SingleGameControllerImpl() {
+        super();
+    }
 
-	public int playGame(int gameId, Player me) {
-		System.out.println("playGame " + gameId);
-		return 0;
-	}
+    public List<Game> getGames() {
+        List<Game> games = new ArrayList<Game>();
+        games.add(this.game);
+        return games;
+    }
 
-	public int placeShipInCell(int gameId, Cell cell) {
-		if(myField.getCell(cell.getX(), cell.getY()).getStatus() != '~') {
-			System.out.println("can't place Ship In Cell " + cell + "it is not empty");
-			return -1;
-		}
-		if(playerShips > 0) {
-			myField.getCell(cell.getX(), cell.getY()).setStatus('s');
-			System.out.println("placeShipInCell " + cell);
-			playerShips--;
-			return 0;
-		} else {
-			System.out.println("can't place Ship In Cell " + cell + ", you don't have ships anymore");
-			return 1;
-		}
-	}
+    public Game createGame(Player me) {
+        this.maxShipElementsNumber = Main.SHIPS;
+        this.enemyField = generateEnemyField();
+        this.myField = initMyField();
+        me.setField(this.myField);
+        this.player = new Player(me.getName(), myField);
+        this.enemy = new Player("Computer", enemyField);
+        this.game = new Game(0, me, enemy);
+        //random player will shot first
+        if (new Random().nextBoolean()) {
+            this.game.setTurn(0);
+        } else {
+            this.game.setTurn(1);
+        }
+        return this.game;
+    }
 
-	//we must hide the enemy fleet here
-	//for that we need to return only cloned and
-	//changed array of cells with hide ships
-	public Field getEnemyField(int gameId) {
-		System.out.println("getEnemyField");
-		Field result = enemyField.clone();
-		Cell[][] enemyCells = result.getCells();
-		for(int i = 0; i < enemyCells.length; i++) {
-			for(int j = 0; j < enemyCells[i].length; j++) {
-				if(enemyCells[i][j].getStatus() == 's') {
-					enemyCells[i][j].setStatus('~');
-				}
-			}
-		}
-		return result;
-	}
+    //returns -1 if error
+    //0 if my turn
+    //1 if enemy turn
+    public int playGame(int gameId, Player me) {
+        return turn;
+    }
 
-	public Field getMyField(int gameId) {
-		System.out.println("getMyFields");
-		return myField;
-	}
+    public int placeShipInCell(int gameId, Cell cell) {
+        if (myField.getCell(cell.getX(), cell.getY()).getStatus() == 's') {
+            if (canSetNewStatus(cell, '~')) {
+                myField.getCell(cell.getX(), cell.getY()).setStatus('~');
+                return 1;
+            } else {
+                return -1;
+            }
+        }
+        if (maxShipElementsNumber > 0) {
+            if (canSetNewStatus(cell, 's')) {
+                myField.getCell(cell.getX(), cell.getY()).setStatus('s');
+                System.out.println("placed Ship in Cell " + cell);
+                maxShipElementsNumber--;
+                return 0;
+            } else {
+                return 1;
+            }
+        } else {
+            System.out.println("can't place Ship in Cell " + cell + ", you don't have ships anymore");
+            return 1;
+        }
+    }
 
-	public Cell shot(int gameId, Cell cell) {
-		System.out.println("shot " + cell);
-		char status = enemyField.getCell(cell.getX(), cell.getY()).getStatus();
-		if (status == 's') {
-			enemyField.getCell(cell.getX(), cell.getY()).setStatus('x');
-		} else {
-			enemyField.getCell(cell.getX(), cell.getY()).setStatus('*');
-		}
-		return cell;
-	}
+    private boolean canSetNewStatus(Cell cell, char status) {
+        Field testField = myField.clone();
+        testField.getCell(cell.getX(), cell.getY()).setStatus(status);
+        List<List<Cell>> myFleet = Helper.processFleet(testField);
+        for (int i = 0; i < Main.POSSIBLE_FLEET.length; i++) {
+            int maxNumber = Main.POSSIBLE_FLEET[i];
+            int currentNumber = 0;
+            for (int j = 0; j < myFleet.size(); j++) {
+                if (myFleet.get(j).size() == i + 1) {
+                    currentNumber++;
+                }
+                if (currentNumber >= maxNumber + 1) {
+                    System.out.println("can't place Ship in Cell " + cell + ", reached " + maxNumber + " max number of cells in ship");
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 
-	private Field getMyExampleField() {		
-		Cell[][] cells = new Cell[10][10];
-		for (int i = 0; i < 10; i++) {
-			for (int j = 0; j < 10; j++) {
-				cells[i][j] = new Cell('~', i, j);
-			}
-		}
-		Field field = new Field(cells);
-		return field;
-	}
+    //we must hide the enemy fleet here
+    //for that we need to return only cloned and
+    //changed array of cells with hide ships
+    public Field getEnemyField(int gameId) {
+        System.out.println("getEnemyField");
+        Field result = enemyField.clone();
+        Cell[][] enemyCells = result.getCells();
+        for (int i = 0; i < enemyCells.length; i++) {
+            for (int j = 0; j < enemyCells[i].length; j++) {
+                if (enemyCells[i][j].getStatus() == 's') {
+                    enemyCells[i][j].setStatus('~');
+                }
+            }
+        }
+        return result;
+    }
 
-	private Field getEnemyExampleField() {
-		Cell[][] cells = new Cell[10][10];
-		for (int i = 0; i < 10; i++) {
-			for (int j = 0; j < 10; j++) {
-				cells[i][j] = new Cell('~', i, j);
-			}
-		}
-		cells[1][2] = new Cell('s', 1, 2);
-		cells[1][3] = new Cell('s', 1, 3);
-		cells[1][4] = new Cell('s', 1, 4);
-		cells[1][5] = new Cell('s', 1, 5);
+    public Field getMyField(int gameId) {
+        return myField;
+    }
 
-		cells[4][8] = new Cell('s', 4, 8);
-		cells[5][8] = new Cell('s', 5, 8);
-		cells[6][8] = new Cell('s', 6, 8);
-		cells[7][8] = new Cell('s', 7, 8);
+    public Cell shot(int gameId, Cell cell) {
+        char status = enemyField.getCell(cell.getX(), cell.getY()).getStatus();
+        if (status == 's') {
+            processHitting(cell);
+        } else {
+            enemyField.getCell(cell.getX(), cell.getY()).setStatus('*');
+        }
+        return cell;
+    }
 
-		cells[5][5] = new Cell('s', 5, 5);
-		Field field = new Field(cells);
-		return field;
-	}
+    private void processHitting(Cell cell) {
+        enemyField.getCell(cell.getX(), cell.getY()).setStatus('x');
+        Set<Cell> shipPositions = new HashSet<Cell>();
+        Helper.findWholeShip(cell.clone(), shipPositions, enemyField.clone().getCells());
+        boolean allDead = true;
+        for (Cell position : shipPositions) {
+            if (enemyField.getCells()[position.getX()][position.getY()].getStatus() == 's') {
+                allDead = false;
+            }
+        }
+        if (allDead) {
+            processDeadShip(shipPositions, enemyField.getCells());
+        }
+    }
+
+    private void processDeadShip(Set<Cell> shipPositions, Cell[][] cells) {
+        for (Cell position : shipPositions) {
+            List<Cell> around = getAroundCells(cells[position.getX()][position.getY()], cells);
+            for (int j = 0; j < around.size(); j++) {
+                around.get(j).setStatus('*');
+            }
+        }
+        for (Cell position : shipPositions) {
+            cells[position.getX()][position.getY()].setStatus('.');
+        }
+    }
+
+    private List<Cell> getAroundCells(Cell cell, Cell[][] cells) {
+        List<Cell> result = new ArrayList<Cell>();
+        if (cell.getX() + 1 < Main.FIELD_DIMENSION &&
+                !cells[cell.getX() + 1][cell.getY()].isShip()) { //+1,0
+            result.add(cells[cell.getX() + 1][cell.getY()]);
+        }
+        if (cell.getX() - 1 >= 0 &&
+                !cells[cell.getX() - 1][cell.getY()].isShip()) { //-1,0
+            result.add(cells[cell.getX() - 1][cell.getY()]);
+        }
+        if (cell.getX() - 1 >= 0 &&
+                cell.getY() + 1 < Main.FIELD_DIMENSION &&
+                !cells[cell.getX() - 1][cell.getY() + 1].isShip()) { //-1,+1
+            result.add(cells[cell.getX() - 1][cell.getY() + 1]);
+        }
+        if (cell.getX() + 1 < Main.FIELD_DIMENSION &&
+                cell.getY() - 1 >= 0 &&
+                !cells[cell.getX() + 1][cell.getY() - 1].isShip()) { //+1,-1
+            result.add(cells[cell.getX() + 1][cell.getY() - 1]);
+        }
+        if (cell.getY() + 1 < Main.FIELD_DIMENSION &&
+                !cells[cell.getX()][cell.getY() + 1].isShip()) { //0,+1
+            result.add(cells[cell.getX()][cell.getY() + 1]);
+        }
+        if (cell.getY() - 1 >= 0 &&
+                !cells[cell.getX()][cell.getY() - 1].isShip()) { //0,-1
+            result.add(cells[cell.getX()][cell.getY() - 1]);
+        }
+        if (cell.getX() + 1 < Main.FIELD_DIMENSION &&
+                cell.getY() + 1 < Main.FIELD_DIMENSION &&
+                !cells[cell.getX() + 1][cell.getY() + 1].isShip()) { //+1,+1
+            result.add(cells[cell.getX() + 1][cell.getY() + 1]);
+        }
+        if (cell.getX() - 1 >= 0 &&
+                cell.getY() - 1 >= 0 &&
+                !cells[cell.getX() - 1][cell.getY() - 1].isShip()) { //-1,-1
+            result.add(cells[cell.getX() - 1][cell.getY() - 1]);
+        }
+        return result;
+    }
+
+    private Field initMyField() {
+        //return new Field(Helper.getEmptyField());
+        return new Field(Helper.generateRandomField());
+    }
+
+    private Field generateEnemyField() {
+        return new Field(Helper.generateRandomField());
+    }
 
 }

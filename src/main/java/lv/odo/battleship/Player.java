@@ -12,8 +12,8 @@ public class Player {
 		this.field = field;
 	}
 
-	public Player() {
-		// TODO Auto-generated constructor stub
+	public Player(String name) {
+		this.name = name;
 	}
 	
 	public String getName() {
@@ -30,14 +30,6 @@ public class Player {
 
 	public void setField(Field field) {
 		this.field = field;
-	}
-	
-	// Takes a user
-	public int[] shoot(){	
-		return null;
-	}
-	
-	public void checkShot(Field field){
 	}
 
 }

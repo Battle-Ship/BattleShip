@@ -41,7 +41,7 @@ public class Cell {
 	
 	@Override
 	public String toString() {
-		return "Cell [status=" + status + ", x=" + x + ", y=" + y + "]";
+		return "[" + x + ":" + y + ":" + status + "]";
 	}
 
 	@Override
@@ -49,6 +49,33 @@ public class Cell {
 		return new Cell(this.status, this.x, this.y);
 	}
 	
-	
+	public boolean isShip() {
+		return status == 's' || status == 'x';
+	}
 
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof Cell)) {
+			return false;
+		}
+
+		Cell cell = (Cell) o;
+
+		if (getStatus() != cell.getStatus()) {
+			return false;
+		}
+		if (getX() != cell.getX()) {
+			return false;
+		}
+		return getY() == cell.getY();
+	}
+
+	public int hashCode() {
+		int result = (int) getStatus();
+		result = 31 * result + getX();
+		result = 31 * result + getY();
+		return result;
+	}
 }
