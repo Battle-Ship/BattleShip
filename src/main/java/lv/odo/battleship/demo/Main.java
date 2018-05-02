@@ -381,15 +381,15 @@ public class Main {
         fl_panel1.setHgap(20);
         panelCenter.add(panel1, BorderLayout.CENTER);
 
-        JButton btnSettings = new JButton();
-        ImageIcon settingsIcon = new ImageIcon("images/settings.png");
-        btnSettings.setIcon(settingsIcon);
+        //JButton btnSettings = new JButton();
+        //ImageIcon settingsIcon = new ImageIcon("images/settings.png");
+        //btnSettings.setIcon(settingsIcon);
         // to remote the spacing between the image and button's borders
-        btnSettings.setMargin(new Insets(0, 0, 0, 0));
+        //btnSettings.setMargin(new Insets(0, 0, 0, 0));
         // to remove the border
-        btnSettings.setBorder(null);
-        btnSettings.setBackground(new Color(224, 255, 255));
-        panel1.add(btnSettings);
+       // btnSettings.setBorder(null);
+       // btnSettings.setBackground(new Color(224, 255, 255));
+        //panel1.add(btnSettings);
 
         JButton btnExit = new JButton();
         ImageIcon exitIcon = new ImageIcon("images/exit.png");
