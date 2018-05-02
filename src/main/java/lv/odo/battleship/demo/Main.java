@@ -393,9 +393,6 @@ public class Main {
 
         JButton btnExit = new JButton();
         ImageIcon exitIcon = new ImageIcon("images/exit.png");
-
-        Component rigidArea_1 = Box.createRigidArea(new Dimension(30, 20));
-        panel1.add(rigidArea_1);
         btnExit.setIcon(exitIcon);
         // to remote the spacing between the image and button's borders
         btnExit.setMargin(new Insets(0, 0, 0, 0));
