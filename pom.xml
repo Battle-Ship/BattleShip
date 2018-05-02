@@ -8,13 +8,20 @@
     <artifactId>battleship</artifactId>
     <version>0.0.1</version>
 
+    <build>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+                <source>1.8</source>
+                <target>1.8</target>
+            </configuration>
+        </plugin>
+    </plugins>
+    </build>
+
     <dependencies>
-        <!-- JDBC exercise using MySQL -->
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.38</version>
-        </dependency>
 
         <!-- Swing exercise -->
         <dependency>
@@ -30,30 +37,11 @@
             <version>4.12</version>
         </dependency>
 
-        <!-- Sql script execution -->
-        <dependency>
-            <groupId>org.apache.ibatis</groupId>
-            <artifactId>ibatis-sqlmap</artifactId>
-            <version>2.3.0</version>
-        </dependency>
-
         <!-- AssertJ Swing tests -->
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-swing-junit</artifactId>
             <version>3.8.0</version>
-        </dependency>
-
-        <!-- JPA exercise using H2 database -->
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>1.4.196</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
-            <version>5.2.10.Final</version>
         </dependency>
 
     </dependencies>

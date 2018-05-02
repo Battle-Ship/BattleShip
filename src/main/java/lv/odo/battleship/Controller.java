@@ -23,6 +23,9 @@ public interface Controller {
 			//returns -1 if error
 			//0 if my turn
 			//1 if enemy turn
+			//2 if enemy places ships
+			//3 if I win
+			//4 if enemy win
 	
 	public int placeShipInCell(int gameId, Cell cell);
 			//returns -1 if no luck

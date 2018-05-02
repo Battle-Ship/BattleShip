@@ -62,7 +62,15 @@ public class SingleGameControllerImpl implements Controller {
     //returns -1 if error
     //0 if my turn
     //1 if enemy turn
+	//2 if enemy places ships
+	//3 if I win
+	//4 if enemy win
     public int playGame(int gameId, Player me) {
+    	if (allShipsAreDead(enemyField.getCells())) {
+    		return 3;
+    	} else if (allShipsAreDead(myField.getCells())) {
+    		return 4;
+    	}
         while (turn == 1) {
             try {
                 Cell nextTarget = ai.selectNextTarget(myField.getCells());
@@ -92,7 +100,22 @@ public class SingleGameControllerImpl implements Controller {
         return turn;
     }
 
-    public int placeShipInCell(int gameId, Cell cell) {
+    private boolean allShipsAreDead(Cell[][] cells) {
+    	int myDeadShips = 0;    	
+		for (int i = 0; i < cells.length; i++) {
+			for (int j = 0; j < cells[i].length; j++) {
+				if (cells[i][j].getStatus() == '.') {
+					myDeadShips++;
+					if (myDeadShips == Main.SHIPS) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	public int placeShipInCell(int gameId, Cell cell) {
         if (myField.getCell(cell.getX(), cell.getY()).getStatus() == 's') {
             if (canOccupyCellWithStatus(cell, '~')) {
                 myField.getCell(cell.getX(), cell.getY()).setStatus('~');
