@@ -1,12 +1,15 @@
 package lv.odo.battleship.demo;
 
 import lv.odo.battleship.Cell;
+
 import lv.odo.battleship.Controller;
 import lv.odo.battleship.Field;
 import lv.odo.battleship.Game;
 import lv.odo.battleship.Helper;
 import lv.odo.battleship.Player;
 import lv.odo.battleship.SingleGameControllerImpl;
+
+import MultiplayerInterface.MenuMulti;
 
 import javax.swing.*;
 import java.awt.*;
@@ -84,14 +87,20 @@ public class Main {
      * Create the application.
      */
     public Main() {
+    	frame = new JFrame();
         initialize();
     }
+    
+    public Main(JFrame frame) {
+    	this.frame = frame;
+        initialize();
+    }
+
 
     /**
      * Initialize the contents of the frame.
      */
     private void initialize() {
-        frame = new JFrame();
         frame.setBounds(100, 100, WINDOW_WIDTH, WINDOW_HEIGHT);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         //we set layout to place game objects on game window
@@ -328,7 +337,7 @@ public class Main {
         frame.getContentPane().validate();
     }
 
-    private void buildStartMenuWindow() {
+    public void buildStartMenuWindow() {
         JPanel panelCenter = new JPanel();
         panelCenter.setBackground(new Color(224, 255, 255));
         panelCenter.setForeground(Color.BLUE);
@@ -363,6 +372,13 @@ public class Main {
 
         JButton btnMultiplayer = new JButton();
         ImageIcon multiplayerIcon = new ImageIcon("images/multiplayer.png");
+        final Main mainMenu = this;
+        btnMultiplayer.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            	frame.getContentPane().removeAll();
+                new MenuMulti(frame, mainMenu );
+            }
+        });
 
         Component rigidArea = Box.createRigidArea(new Dimension(10, 20));
         panel0.add(rigidArea);

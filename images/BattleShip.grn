@@ -29,32 +29,6 @@
       <y="30"/>
    </type>
    <relationship>
-      <class="edu.buffalo.cse.green.relationship.dependency.DependencyIPart"/>
-      <sourceType="=BattleShip/src\/main\/java<lv.odo.battleship{Cell.java[Cell"/>
-      <targetType="=BattleShip/src\/main\/java<lv.odo.battleship{Cell.java[Cell"/>
-      <bendpoints>
-         <bendpoint>
-            <x="40"/>
-            <y="0"/>
-         </bendpoint>
-         <bendpoint>
-            <x="40"/>
-            <y="-40"/>
-         </bendpoint>
-         <bendpoint>
-            <x="0"/>
-            <y="-40"/>
-         </bendpoint>
-      </bendpoints>
-   </relationship>
-   <relationship>
-      <class="edu.buffalo.cse.green.relationship.association.AssociationPart"/>
-      <sourceType="=BattleShip/src\/main\/java<lv.odo.battleship{Game.java[Game"/>
-      <targetType="=BattleShip/src\/main\/java<lv.odo.battleship{Player.java[Player"/>
-      <bendpoints>
-      </bendpoints>
-   </relationship>
-   <relationship>
       <class="edu.buffalo.cse.green.relationship.association.AssociationPart"/>
       <sourceType="=BattleShip/src\/main\/java<lv.odo.battleship{Field.java[Field"/>
       <targetType="=BattleShip/src\/main\/java<lv.odo.battleship{Cell.java[Cell"/>
@@ -84,6 +58,32 @@
       <class="edu.buffalo.cse.green.relationship.association.AssociationPart"/>
       <sourceType="=BattleShip/src\/main\/java<lv.odo.battleship{Player.java[Player"/>
       <targetType="=BattleShip/src\/main\/java<lv.odo.battleship{Field.java[Field"/>
+      <bendpoints>
+      </bendpoints>
+   </relationship>
+   <relationship>
+      <class="edu.buffalo.cse.green.relationship.dependency.DependencyIPart"/>
+      <sourceType="=BattleShip/src\/main\/java<lv.odo.battleship{Cell.java[Cell"/>
+      <targetType="=BattleShip/src\/main\/java<lv.odo.battleship{Cell.java[Cell"/>
+      <bendpoints>
+         <bendpoint>
+            <x="40"/>
+            <y="0"/>
+         </bendpoint>
+         <bendpoint>
+            <x="40"/>
+            <y="-40"/>
+         </bendpoint>
+         <bendpoint>
+            <x="0"/>
+            <y="-40"/>
+         </bendpoint>
+      </bendpoints>
+   </relationship>
+   <relationship>
+      <class="edu.buffalo.cse.green.relationship.association.AssociationPart"/>
+      <sourceType="=BattleShip/src\/main\/java<lv.odo.battleship{Game.java[Game"/>
+      <targetType="=BattleShip/src\/main\/java<lv.odo.battleship{Player.java[Player"/>
       <bendpoints>
       </bendpoints>
    </relationship>
