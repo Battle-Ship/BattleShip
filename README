@@ -1,0 +1,14 @@
+If you use computer in Bootcamp class:
+	1.	﻿Place folder 'GameFolder' to 'workspace'; 
+	2. 	Run this commands in Terminal:
+			cd workspace/GameFolder
+			chmod +x Game
+	3. 	Run Game file (chose 'Execute' when will be asked);
+	4.  	Repeat step 3 every time you want to play the game;
+
+If you use other computer:
+	1.	﻿Place folder 'GameFolder' where you want, for example 'workspace'; 
+	2. 	Run Terminal and change directory to 'GameFolder'. (For example, cd workspace/GameFolder);
+	3. 	Run this command in terminal:
+			java -cp Game.jar lv/odo/battleship/demo/Main
+	4. Repeat steps 2 and 3 every time you want to play the game;

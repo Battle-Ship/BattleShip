@@ -1,0 +1,5 @@
+﻿#!/bin/bash  
+cd /home/student/workspace/GameFolder
+java -cp Game.jar lv/odo/battleship/demo/Main
+
+
